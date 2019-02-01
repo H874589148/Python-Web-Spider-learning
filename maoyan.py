@@ -1,5 +1,6 @@
 #pycharm
 
+import json
 import requests
 from lxml import etree
 
@@ -27,12 +28,31 @@ def parse(text):
     names = html.xpath('//div[@class="movie-item-info"]/p[@class="name"]/a/@title')
 
     releasetimes = html.xpath('//p[@class="releasetime"]/text()')
+    item = {}  # dict
     #zip是拉链函数
     for name,releasetime in zip(names,releasetimes):
         print(name,releasetime)
+        #字典
+        item['name'] = name
+        item['releasetime'] = releasetime
+        #生成器 循环迭代
+        yield item
     #print(names)
     #print(releasetimes)
 
-for i in [1,2,3,4,5,6,7,8,9,10]:
-    text = getOnePage(i)          #直接输入页码即可
-    parse(text)
+#保存数据
+def save2File(data):
+    with open('movie.json','a',encoding='utf-8') as f:
+        #把字典 列表 转化成字符串
+        data = json.dumps(data,ensure_ascii=False) + ',\n'
+        f.write(data)
+
+def run():
+    for i in [1,2,3,4,5,6,7,8,9,10]:
+        text = getOnePage(i)          #直接输入页码即可
+        items = parse(text)
+        for item in items:
+            save2File(item)
+
+if __name__ == '__main__':
+    run()
